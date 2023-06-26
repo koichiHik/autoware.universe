@@ -86,6 +86,10 @@ localization/pose2twist/** yamato.ando@tier4.jp @autowarefoundation/autoware-glo
 localization/pose_initializer/** isamu.takagi@tier4.jp yamato.ando@tier4.jp @autowarefoundation/autoware-global-codeowners
 localization/stop_filter/** koji.minoda@tier4.jp yamato.ando@tier4.jp @autowarefoundation/autoware-global-codeowners
 localization/twist2accel/** koji.minoda@tier4.jp yamato.ando@tier4.jp @autowarefoundation/autoware-global-codeowners
+localization/yabloc/yabloc_common/** kento.yabuuchi.2@tier4.jp @autowarefoundation/autoware-global-codeowners
+localization/yabloc/yabloc_image_processing/** kento.yabuuchi.2@tier4.jp @autowarefoundation/autoware-global-codeowners
+localization/yabloc/yabloc_particle_filter/** kento.yabuuchi.2@tier4.jp @autowarefoundation/autoware-global-codeowners
+localization/yabloc/yabloc_pose_initializer/** kento.yabuuchi.2@tier4.jp @autowarefoundation/autoware-global-codeowners
 map/map_height_fitter/** isamu.takagi@tier4.jp yamato.ando@tier4.jp @autowarefoundation/autoware-global-codeowners
 map/map_loader/** koji.minoda@tier4.jp ryohsuke.mitsudome@tier4.jp ryu.yamamoto@tier4.jp @autowarefoundation/autoware-global-codeowners
 map/map_tf_generator/** azumi.suzuki@tier4.jp @autowarefoundation/autoware-global-codeowners
