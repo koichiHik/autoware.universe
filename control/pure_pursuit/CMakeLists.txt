@@ -18,7 +18,7 @@ ament_auto_add_library(pure_pursuit_core SHARED
   src/pure_pursuit_core/interpolate.cpp
 )
 
-# pure_pursuit
+# pure_pursuit_lateral
 ament_auto_add_library(pure_pursuit_lateral_controller SHARED
   src/pure_pursuit/pure_pursuit_lateral_controller.cpp
   src/pure_pursuit/pure_pursuit_viz.cpp
@@ -31,6 +31,21 @@ target_link_libraries(pure_pursuit_lateral_controller
 rclcpp_components_register_node(pure_pursuit_lateral_controller
   PLUGIN "pure_pursuit::PurePursuitLateralController"
   EXECUTABLE pure_pursuit_lateral_controller_exe
+)
+
+# pure_pursuit
+ament_auto_add_library(pure_pursuit_node SHARED
+  src/pure_pursuit/pure_pursuit_node.cpp
+  src/pure_pursuit/pure_pursuit_viz.cpp
+)
+
+target_link_libraries(pure_pursuit_node
+  pure_pursuit_core
+)
+
+rclcpp_components_register_node(pure_pursuit_node
+  PLUGIN "pure_pursuit::PurePursuitNode"
+  EXECUTABLE pure_pursuit_node_exe
 )
 
 ament_auto_package(INSTALL_TO_SHARE

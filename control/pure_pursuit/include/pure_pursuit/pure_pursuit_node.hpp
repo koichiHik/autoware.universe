@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2020 Tier IV, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -98,8 +99,11 @@ private:
   // Publisher
   rclcpp::Publisher<autoware_auto_control_msgs::msg::AckermannLateralCommand>::SharedPtr
     pub_ctrl_cmd_;
+  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr pub_twist_cmd_;
 
   void publishCommand(const double target_curvature);
+
+  void publishTwistCommand(const double curvature, const double velocity);
 
   // Debug Publisher
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr pub_debug_marker_;
@@ -116,7 +120,7 @@ private:
   // Algorithm
   std::unique_ptr<PurePursuit> pure_pursuit_;
 
-  boost::optional<double> calcTargetCurvature();
+  boost::optional<double> calcTargetCurvature(int &next_wp_idx);
   boost::optional<autoware_auto_planning_msgs::msg::TrajectoryPoint> calcTargetPoint() const;
 
   // Debug
@@ -126,3 +130,4 @@ private:
 }  // namespace pure_pursuit
 
 #endif  // PURE_PURSUIT__PURE_PURSUIT_NODE_HPP_
+// clang-format on

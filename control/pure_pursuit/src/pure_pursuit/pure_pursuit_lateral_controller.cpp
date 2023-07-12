@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2020-2022 Tier IV, Inc., Leo Drive Teknoloji A.Ş.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -480,7 +481,7 @@ boost::optional<PpOutput> PurePursuitLateralController::calcTargetCurvature(
     return {};
   }
 
-  const auto kappa = pure_pursuit_result.second;
+  const auto kappa = pure_pursuit_result.second.second;
 
   // Set debug data
   if (is_control_output) {
@@ -497,3 +498,4 @@ boost::optional<PpOutput> PurePursuitLateralController::calcTargetCurvature(
   return output;
 }
 }  // namespace pure_pursuit
+// clang-format on

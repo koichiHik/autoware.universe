@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2020 Tier IV, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,10 +50,10 @@ bool PurePursuit::isDataReady()
   return true;
 }
 
-std::pair<bool, double> PurePursuit::run()
+std::pair<bool, std::pair<int, double>> PurePursuit::run()
 {
   if (!isDataReady()) {
-    return std::make_pair(false, std::numeric_limits<double>::quiet_NaN());
+    return std::make_pair(false, std::make_pair(-1, std::numeric_limits<double>::quiet_NaN()));
   }
 
   auto clst_pair = planning_utils::findClosestIdxWithDistAngThr(
@@ -61,13 +62,13 @@ std::pair<bool, double> PurePursuit::run()
   if (!clst_pair.first) {
     RCLCPP_WARN(
       logger, "cannot find, curr_bool: %d, clst_idx: %d", clst_pair.first, clst_pair.second);
-    return std::make_pair(false, std::numeric_limits<double>::quiet_NaN());
+    return std::make_pair(false, std::make_pair(-1, std::numeric_limits<double>::quiet_NaN()));
   }
 
   int32_t next_wp_idx = findNextPointIdx(clst_pair.second);
   if (next_wp_idx == -1) {
     RCLCPP_WARN(logger, "lost next waypoint");
-    return std::make_pair(false, std::numeric_limits<double>::quiet_NaN());
+    return std::make_pair(false, std::make_pair(-1, std::numeric_limits<double>::quiet_NaN()));
   }
 
   loc_next_wp_ = curr_wps_ptr_->at(next_wp_idx).position;
@@ -82,7 +83,7 @@ std::pair<bool, double> PurePursuit::run()
 
     if (!lerp_pair.first) {
       RCLCPP_WARN(logger, "lost target! ");
-      return std::make_pair(false, std::numeric_limits<double>::quiet_NaN());
+      return std::make_pair(false, std::make_pair(-1, std::numeric_limits<double>::quiet_NaN()));
     }
 
     next_tgt_pos = lerp_pair.second;
@@ -91,7 +92,7 @@ std::pair<bool, double> PurePursuit::run()
 
   double kappa = planning_utils::calcCurvature(next_tgt_pos, *curr_pose_ptr_);
 
-  return std::make_pair(true, kappa);
+  return std::make_pair(true, std::make_pair(next_wp_idx, kappa));
 }
 
 // linear interpolation of next target
@@ -209,3 +210,4 @@ void PurePursuit::setWaypoints(const std::vector<geometry_msgs::msg::Pose> & msg
 }
 
 }  // namespace pure_pursuit
+// clang-format on

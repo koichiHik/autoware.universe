@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2020 Tier IV, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,7 +67,7 @@ public:
   geometry_msgs::msg::Point getLocationOfNextTarget() const { return loc_next_tgt_; }
 
   bool isDataReady();
-  std::pair<bool, double> run();  // calculate curvature
+  std::pair<bool, std::pair<int, double>> run();  // calculate curvature
 
 private:
   // variables for debug
@@ -86,3 +87,4 @@ private:
 }  // namespace pure_pursuit
 
 #endif  // PURE_PURSUIT__PURE_PURSUIT_HPP_
+// clang-format on

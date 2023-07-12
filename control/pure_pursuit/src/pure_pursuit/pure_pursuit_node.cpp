@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2020 Tier IV, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -81,6 +82,7 @@ PurePursuitNode::PurePursuitNode(const rclcpp::NodeOptions & node_options)
   // Publishers
   pub_ctrl_cmd_ = this->create_publisher<autoware_auto_control_msgs::msg::AckermannLateralCommand>(
     "output/control_raw", 1);
+  pub_twist_cmd_ = this->create_publisher<geometry_msgs::msg::Twist>("output/control_twist", 1);
 
   // Debug Publishers
   pub_debug_marker_ =
@@ -132,15 +134,22 @@ void PurePursuitNode::onTrajectory(
 void PurePursuitNode::onTimer()
 {
   current_pose_ = self_pose_listener_.getCurrentPose();
-
+  // RCLCPP_INFO(this->get_logger(), "Pose %lf, %lf, %lf, %lf, %lf, %lf, %lf", 
+  //   current_pose_->pose.position.x, current_pose_->pose.position.y, 
+  //   current_pose_->pose.position.z, current_pose_->pose.orientation.w, current_pose_->pose.orientation.x,
+  //   current_pose_->pose.orientation.y, current_pose_->pose.orientation.z);
   if (!isDataReady()) {
     return;
   }
 
-  const auto target_curvature = calcTargetCurvature();
+  int next_wp_idx;
+  const auto target_curvature = calcTargetCurvature(next_wp_idx);
 
   if (target_curvature) {
     publishCommand(*target_curvature);
+
+    double vx = trajectory_->points.at(next_wp_idx).longitudinal_velocity_mps;
+    publishTwistCommand(*target_curvature, vx);
     publishDebugMarker();
   } else {
     RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 5000, "failed to solve pure_pursuit");
@@ -157,6 +166,18 @@ void PurePursuitNode::publishCommand(const double target_curvature)
   pub_ctrl_cmd_->publish(cmd);
 }
 
+void PurePursuitNode::publishTwistCommand(const double curvature, const double velocity) 
+{
+  geometry_msgs::msg::Twist twist_cmd;
+  twist_cmd.linear.x = velocity;
+  twist_cmd.linear.y = 0.0;
+  twist_cmd.linear.z = 0.0;
+  twist_cmd.angular.x = 0.0;
+  twist_cmd.angular.y = 0.0;
+  twist_cmd.angular.z = curvature * velocity;
+  pub_twist_cmd_->publish(twist_cmd);
+}
+
 void PurePursuitNode::publishDebugMarker() const
 {
   visualization_msgs::msg::MarkerArray marker_array;
@@ -168,7 +189,7 @@ void PurePursuitNode::publishDebugMarker() const
   pub_debug_marker_->publish(marker_array);
 }
 
-boost::optional<double> PurePursuitNode::calcTargetCurvature()
+boost::optional<double> PurePursuitNode::calcTargetCurvature(int &next_wp_idx)
 {
   // Ignore invalid trajectory
   if (trajectory_->points.size() < 3) {
@@ -203,7 +224,8 @@ boost::optional<double> PurePursuitNode::calcTargetCurvature()
     return {};
   }
 
-  const auto kappa = pure_pursuit_result.second;
+  next_wp_idx = pure_pursuit_result.second.first;
+  const auto kappa = pure_pursuit_result.second.second;
 
   // Set debug data
   debug_data_.next_target = pure_pursuit_->getLocationOfNextTarget();
@@ -228,3 +250,4 @@ PurePursuitNode::calcTargetPoint() const
 
 #include <rclcpp_components/register_node_macro.hpp>
 RCLCPP_COMPONENTS_REGISTER_NODE(pure_pursuit::PurePursuitNode)
+// clang-format on

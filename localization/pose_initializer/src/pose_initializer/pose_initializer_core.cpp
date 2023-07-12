@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2022 The Autoware Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -70,6 +71,7 @@ void PoseInitializer::on_initialize(
   const Initialize::Service::Request::SharedPtr req,
   const Initialize::Service::Response::SharedPtr res)
 {
+  // RCLCPP_INFO(this->get_logger(), "IN PoseInitializer::on_initialize");
   // NOTE: This function is not executed during initialization because mutually exclusive.
   if (stop_check_ && !stop_check_->isVehicleStopped(stop_check_duration_)) {
     throw ServiceException(
@@ -78,21 +80,27 @@ void PoseInitializer::on_initialize(
   try {
     change_state(State::Message::INITIALIZING);
     if (ekf_localization_trigger_) {
+      // RCLCPP_INFO(this->get_logger(), "ekf_localization_trigger_->send_request(false)");
       ekf_localization_trigger_->send_request(false);
     }
     if (ndt_localization_trigger_) {
+      // RCLCPP_INFO(this->get_logger(), "ndt_localization_trigger_->send_request(false)");
       ndt_localization_trigger_->send_request(false);
     }
     auto pose = req->pose.empty() ? get_gnss_pose() : req->pose.front();
     if (ndt_) {
+      // RCLCPP_INFO(this->get_logger(), "ndt_->align_pose(pose)");
       pose = ndt_->align_pose(pose);
     }
     pose.pose.covariance = output_pose_covariance_;
+    // RCLCPP_INFO(this->get_logger(), "pub_reset_->publish(pose)");
     pub_reset_->publish(pose);
     if (ekf_localization_trigger_) {
+      // RCLCPP_INFO(this->get_logger(), "ekf_localization_trigger_->send_request(true)");
       ekf_localization_trigger_->send_request(true);
     }
     if (ndt_localization_trigger_) {
+      // RCLCPP_INFO(this->get_logger(), "ndt_localization_trigger_->send_request(true)");
       ndt_localization_trigger_->send_request(true);
     }
     res->status.success = true;
@@ -113,3 +121,4 @@ geometry_msgs::msg::PoseWithCovarianceStamped PoseInitializer::get_gnss_pose()
   throw ServiceException(
     Initialize::Service::Response::ERROR_GNSS_SUPPORT, "GNSS is not supported.");
 }
+// clang-format on
