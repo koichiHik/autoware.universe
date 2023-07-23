@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2022 The Autoware Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,6 +43,22 @@ bool isPcdFile(const std::string & p)
 
   return true;
 }
+
+bool isPlyFile(const std::string & p) 
+{
+  if (fs::is_directory(p)) {
+    return false;
+  }
+
+  const std::string ext = fs::path(p).extension();
+
+  if (ext != ".ply" && ext != ".PLY") {
+    return false;
+  }
+
+  return true;
+}
+
 }  // namespace
 
 PointCloudMapLoaderNode::PointCloudMapLoaderNode(const rclcpp::NodeOptions & options)
@@ -131,12 +148,16 @@ std::vector<std::string> PointCloudMapLoaderNode::getPcdPaths(
 
     if (isPcdFile(p)) {
       pcd_paths.push_back(p);
+    } else if (isPlyFile(p)) {
+      pcd_paths.push_back(p);
     }
 
     if (fs::is_directory(p)) {
       for (const auto & file : fs::directory_iterator(p)) {
         const auto filename = file.path().string();
         if (isPcdFile(filename)) {
+          pcd_paths.push_back(filename);
+        } else if (isPlyFile(filename)) {
           pcd_paths.push_back(filename);
         }
       }
@@ -147,3 +168,4 @@ std::vector<std::string> PointCloudMapLoaderNode::getPcdPaths(
 
 #include <rclcpp_components/register_node_macro.hpp>
 RCLCPP_COMPONENTS_REGISTER_NODE(PointCloudMapLoaderNode)
+// clang-format on

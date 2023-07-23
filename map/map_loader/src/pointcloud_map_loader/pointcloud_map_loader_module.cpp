@@ -1,3 +1,4 @@
+// clang-format off
 // Copyright 2022 The Autoware Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +21,51 @@
 
 #include <string>
 #include <vector>
+#include <filesystem>
+
+namespace fs = std::filesystem;
+
+namespace
+{
+bool isPcdFile(const std::string & p)
+{
+  if (fs::is_directory(p)) {
+    return false;
+  }
+
+  const std::string ext = fs::path(p).extension();
+
+  if (ext != ".pcd" && ext != ".PCD") {
+    return false;
+  }
+
+  return true;
+}
+
+bool isPlyFile(const std::string & p) 
+{
+  if (fs::is_directory(p)) {
+    return false;
+  }
+
+  const std::string ext = fs::path(p).extension();
+
+  if (ext != ".ply" && ext != ".PLY") {
+    return false;
+  }
+
+  return true;
+}
+
+int loadPLYFile(const std::string &path, sensor_msgs::msg::PointCloud2 &cloud) {
+  pcl::PCLPointCloud2 pcl_cloud;
+  int ret = pcl::io::loadPLYFile(path, pcl_cloud);
+  pcl_conversions::moveFromPCL(pcl_cloud, cloud);
+  return ret;
+}
+
+}  // namespace
+
 
 sensor_msgs::msg::PointCloud2 downsample(
   const sensor_msgs::msg::PointCloud2 & msg_input, const float leaf_size)
@@ -78,8 +124,10 @@ sensor_msgs::msg::PointCloud2 PointcloudMapLoaderModule::loadPCDFiles(
         logger_, fmt::format("Load {} ({} out of {})", path, i + 1, pcd_paths.size()));
     }
 
-    if (pcl::io::loadPCDFile(path, partial_pcd) == -1) {
+    if (isPcdFile(path) && pcl::io::loadPCDFile(path, partial_pcd) == -1) {
       RCLCPP_ERROR_STREAM(logger_, "PCD load failed: " << path);
+    } else if (isPlyFile(path) && loadPLYFile(path, partial_pcd) == -1) {
+      RCLCPP_ERROR_STREAM(logger_, "PLY load failed: " << path);
     }
 
     if (leaf_size) {
@@ -99,3 +147,4 @@ sensor_msgs::msg::PointCloud2 PointcloudMapLoaderModule::loadPCDFiles(
 
   return whole_pcd;
 }
+// clang-format on
